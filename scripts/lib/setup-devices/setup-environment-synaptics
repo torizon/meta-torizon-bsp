@@ -10,7 +10,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
 #
 
-source ${_TDX_LAYERS_DIR}/poky/oe-init-build-env "${1:-build-$DISTRO}" >/dev/null 2>&1
+source ${_TDX_LAYERS_DIR}/oe-core/oe-init-build-env "${1:-build-$DISTRO}" >/dev/null 2>&1
 tdx_set_builddir_from_cwd
 
 # check if this <build> folder was already configured. Marker is the
