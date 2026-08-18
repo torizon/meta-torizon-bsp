@@ -6,4 +6,4 @@ SRC_URI += "\
     file://intel-corei7-64.cfg \
 "
 
-RDEPENDS_${PN}:append = " linux-firmware-rtl8188 "
+RDEPENDS:${PN}:append = " linux-firmware-rtl8188 "
