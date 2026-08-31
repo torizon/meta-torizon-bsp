@@ -15,9 +15,11 @@ tdx_set_builddir_from_cwd
 
 if tdx_needs_once conf/local.conf; then
   sed -i "/^MACHINE .*/c\MACHINE ?= '$MACHINE'" conf/local.conf
-  sed -i "/^DISTRO .*/c\DISTRO ?= '$DISTRO'" conf/local.conf
 
   tdx_append_once conf/local.conf "# Torizon" <<EOF
+# oe-core's local.conf.sample no longer ships a DISTRO line to sed in place.
+DISTRO = "${DISTRO}"
+
 # Where to store sources
 DL_DIR ?= "${_TDX_OEROOT}/downloads"
 
@@ -54,9 +56,11 @@ BBLAYERS += "\${OEROOT}/layers/meta-intel"
 # Torizon
 BBLAYERS += "\${OEROOT}/layers/meta-torizon-bsp"
 BBLAYERS += "\${OEROOT}/layers/meta-torizon"
+BBLAYERS += "\${OEROOT}/layers/meta-yocto/meta-poky"
 # Torizon deps
 BBLAYERS += "\${OEROOT}/layers/meta-updater"
 BBLAYERS += "\${OEROOT}/layers/meta-virtualization"
+BBLAYERS += "\${OEROOT}/layers/meta-security"
 # meta-updater and meta-virtualization deps
 BBLAYERS += "\${OEROOT}/layers/meta-openembedded/meta-filesystems"
 BBLAYERS += "\${OEROOT}/layers/meta-openembedded/meta-python"
