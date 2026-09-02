@@ -7,3 +7,5 @@ SRC_URI += "\
 "
 
 RDEPENDS:${PN}:append = " linux-firmware-rtl8188 "
+
+DEPENDS:append = " lz4-native"
