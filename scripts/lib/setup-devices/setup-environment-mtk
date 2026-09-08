@@ -10,9 +10,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
 #
 # Build environment setup for the ADLINK LEC-MTK-i1200 (MediaTek Genio 1200 /
-# MT8395) on the I-Pi SMARC 1200 carrier board. The MediaTek (meta-mediatek-bsp)
-# and ADLINK (meta-adlink-mtk) BSP layers are cloned manually into layers/ - see
-# layers/meta-torizon-bsp/docs/README-genio.md.
+# MT8395) on the I-Pi SMARC 1200 carrier board.
 
 [ -z "${SDKMACHINE}" ] && SDKMACHINE='x86_64'
 
