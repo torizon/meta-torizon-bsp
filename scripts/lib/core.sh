@@ -264,6 +264,8 @@ tdx_setup_path() {
     PATH="${_TDX_OEROOT}/bitbake/bin:${_TDX_OEROOT}/.repo/repo:${PATH}"
     PATH="${_TDX_OEROOT}/layers/openembedded-core/bitbake/bin:${PATH}"
     PATH="${_TDX_OEROOT}/layers/openembedded-core/scripts:${PATH}"
+    PATH="${_TDX_OEROOT}/layers/bitbake/bin:${PATH}"
+    PATH="${_TDX_OEROOT}/layers/oe-core/scripts:${PATH}"
     PATH=$(echo "${PATH}" |
            awk -F: '{for (i=1;i<=NF;i++) { if ( !x[$i]++ ) printf("%s:",$i); }}' |
            sed 's/:$//')

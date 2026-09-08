@@ -1,7 +1,7 @@
-From 099787d670f07af8bc67d6988460eb1f79041aa5 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Vladimir Skvortsov <vskvortsov@emcraft.com>
-Date: Mon, 13 Apr 2026 12:06:56 +0000
-Subject: Implement support for the Torizon boot:
+Date: Thu, 11 Jun 2026 12:12:36 -0300
+Subject: [PATCH] Implement support for the Torizon boot:
 
 * added the dedicated boot mode option NVIDIA_L4T_BOOTMODE_TORIZON
 * if NVIDIA_L4T_BOOTMODE_TORIZON is selected use uEnv.txt instead of
@@ -12,26 +12,22 @@ Subject: Implement support for the Torizon boot:
 
 Signed-off-by: Vladimir Skvortsov <vskvortsov@emcraft.com>
 Signed-off-by: Eduardo Ferreira <eduardo.barbosa@toradex.com>
-Signed-off-by: Leonardo Bornia <leonardo.bornia@toradex.com>
+[matheus: rebased onto edk2-nvidia 0887a54c (r36.4.4-updates); manually
+ reapplied NvidiaConfigDxe.inf, NvidiaConfigHii.h and NvidiaConfigHiiMap.uni
+ hunks due to context drift]
+Signed-off-by: Matheus Rodrigues <matheus.rodrigues@toradex.com>
+[matheus: rebased onto edk2-nvidia bd49b331 (39.2.0-updates); reapplied
+ fuzzy-matched hunks in NVIDIA.common.dsc.inc/L4TLauncher.c/.h/
+ L4TRootfsValidation.c/NvidiaConfigDxe.c/NvidiaConfigHii.uni/.vfr/
+ NVIDIAConfiguration.h/NVIDIA.dec, and manually reapplied the 3 hunks
+ that no longer matched (NvidiaConfigDxe.inf, NvidiaConfigHii.h,
+ NvidiaConfigHiiMap.uni - all just needed a different free PCD/KEY slot,
+ upstream had taken the old ones). L4TConfiguration.dts's existing hunk
+ (TorizonBootFlags variable and the Torizon default boot mode value)
+ applied cleanly against the new base, no adjustment needed.]
 ---
- Platform/NVIDIA/NVIDIA.common.dsc.inc         |   1 +
- .../Application/L4TLauncher/L4TLauncher.c     | 120 ++++++++++++++++--
- .../Application/L4TLauncher/L4TLauncher.h     |  13 ++
- .../L4TLauncher/L4TRootfsValidation.c         |  57 ++++++++-
- .../L4TLauncher/L4TRootfsValidation.h         |   1 +
- .../Drivers/NvidiaConfigDxe/NvidiaConfigDxe.c |   3 +
- .../NvidiaConfigDxe/NvidiaConfigDxe.inf       |   1 +
- .../Drivers/NvidiaConfigDxe/NvidiaConfigHii.h |   1 +
- .../NvidiaConfigDxe/NvidiaConfigHii.uni       |   7 +
- .../NvidiaConfigDxe/NvidiaConfigHii.vfr       |  18 +++
- .../NvidiaConfigDxe/NvidiaConfigHiiMap.uni    |   6 +
- Silicon/NVIDIA/Include/NVIDIAConfiguration.h  |  11 ++
- Silicon/NVIDIA/NVIDIA.dec                     |   5 +
- .../Tegra/DeviceTree/L4TConfiguration.dts     |   7 +-
- 14 files changed, 241 insertions(+), 10 deletions(-)
-
 diff --git a/Platform/NVIDIA/NVIDIA.common.dsc.inc b/Platform/NVIDIA/NVIDIA.common.dsc.inc
-index d863a1e..89c24a6 100644
+index d863a1e1..89c24a6f 100644
 --- a/Platform/NVIDIA/NVIDIA.common.dsc.inc
 +++ b/Platform/NVIDIA/NVIDIA.common.dsc.inc
 @@ -1259,6 +1259,7 @@ CONFIG_FMP_CERTIFICATES_DTB_MAX_SIZE=0
@@ -43,7 +39,7 @@ index d863a1e..89c24a6 100644
    gNVIDIATokenSpaceGuid.PcdAcpiTimerEnabled|L"AcpiTimerEnabled"|gNVIDIAPublicVariableGuid|0x0|0|BS,NV
  !ifdef CONFIG_SHELL
 diff --git a/Silicon/NVIDIA/Application/L4TLauncher/L4TLauncher.c b/Silicon/NVIDIA/Application/L4TLauncher/L4TLauncher.c
-index 319dd60..5fa6dd9 100644
+index 319dd609..5fa6dd9e 100644
 --- a/Silicon/NVIDIA/Application/L4TLauncher/L4TLauncher.c
 +++ b/Silicon/NVIDIA/Application/L4TLauncher/L4TLauncher.c
 @@ -1276,7 +1276,7 @@ EFI_STATUS
@@ -232,7 +228,7 @@ index 319dd60..5fa6dd9 100644
            ErrorPrint (L"%a: Unable to process extlinux config: %r\r\n", __FUNCTION__, Status);
            BootParams.BootMode = NVIDIA_L4T_BOOTMODE_BOOTIMG;
 diff --git a/Silicon/NVIDIA/Application/L4TLauncher/L4TLauncher.h b/Silicon/NVIDIA/Application/L4TLauncher/L4TLauncher.h
-index 56ad313..1dc5c1d 100644
+index 56ad3138..1dc5c1d9 100644
 --- a/Silicon/NVIDIA/Application/L4TLauncher/L4TLauncher.h
 +++ b/Silicon/NVIDIA/Application/L4TLauncher/L4TLauncher.h
 @@ -20,6 +20,7 @@
@@ -263,7 +259,7 @@ index 56ad313..1dc5c1d 100644
  
  #define SIG_FILE_SIZE_2KB  SIZE_2KB
 diff --git a/Silicon/NVIDIA/Application/L4TLauncher/L4TRootfsValidation.c b/Silicon/NVIDIA/Application/L4TLauncher/L4TRootfsValidation.c
-index f12ab9f..3b897c0 100644
+index f12ab9f1..3b897c0a 100644
 --- a/Silicon/NVIDIA/Application/L4TLauncher/L4TRootfsValidation.c
 +++ b/Silicon/NVIDIA/Application/L4TLauncher/L4TRootfsValidation.c
 @@ -638,6 +638,10 @@ ValidateRootfsStatus (
@@ -352,7 +348,7 @@ index f12ab9f..3b897c0 100644
  
  Exit:
 diff --git a/Silicon/NVIDIA/Application/L4TLauncher/L4TRootfsValidation.h b/Silicon/NVIDIA/Application/L4TLauncher/L4TRootfsValidation.h
-index 17b3e7f..51d74e9 100644
+index 17b3e7f4..51d74e99 100644
 --- a/Silicon/NVIDIA/Application/L4TLauncher/L4TRootfsValidation.h
 +++ b/Silicon/NVIDIA/Application/L4TLauncher/L4TRootfsValidation.h
 @@ -87,6 +87,7 @@ typedef struct {
@@ -364,7 +360,7 @@ index 17b3e7f..51d74e9 100644
  
  /**
 diff --git a/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigDxe.c b/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigDxe.c
-index 717955a..750ae75 100644
+index 717955ab..750ae75f 100644
 --- a/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigDxe.c
 +++ b/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigDxe.c
 @@ -2351,6 +2351,9 @@ InitializeSettings (
@@ -378,19 +374,19 @@ index 717955a..750ae75 100644
    PcdSet8S (PcdIpmiNetworkBootMode, PcdGet8 (PcdIpmiNetworkBootMode));
  
 diff --git a/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigDxe.inf b/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigDxe.inf
-index 307d682..d065498 100644
+index 307d682e..bc3fcccd 100644
 --- a/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigDxe.inf
 +++ b/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigDxe.inf
-@@ -105,6 +105,7 @@
+@@ -104,6 +104,7 @@
+   gNVIDIATokenSpaceGuid.PcdSocDisplayHandoffMode
    gNVIDIATokenSpaceGuid.PcdSocDisplayHandoffMethod
    gNVIDIATokenSpaceGuid.PcdServerPowerControlSetting
-   gNVIDIATokenSpaceGuid.PcdNvGopSupported
 +  gNVIDIATokenSpaceGuid.PcdTorizonBootFlags
+   gNVIDIATokenSpaceGuid.PcdNvGopSupported
    gNVIDIATokenSpaceGuid.PcdLockAllVariables
  
- [Depex]
 diff --git a/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigHii.h b/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigHii.h
-index 41b7d49..ddd340a 100644
+index 41b7d498..ddd340a0 100644
 --- a/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigHii.h
 +++ b/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigHii.h
 @@ -128,6 +128,7 @@
@@ -402,7 +398,7 @@ index 41b7d49..ddd340a 100644
  #define KEY_UPHY0_SOCKET0_CONFIG  0x1100
  #define KEY_UPHY1_SOCKET0_CONFIG  0x1101
 diff --git a/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigHii.uni b/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigHii.uni
-index 39640d5..67bf62f 100644
+index 39640d52..67bf62f3 100644
 --- a/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigHii.uni
 +++ b/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigHii.uni
 @@ -54,6 +54,8 @@
@@ -427,7 +423,7 @@ index 39640d5..67bf62f 100644
  #string STR_RESET_VARIABLES_HELP         #language en-US  "Reset all non-authenticated settings (reboot required)"
  #string STR_RESET_VARIABLES_PROMPT       #language en-US  "Reset Settings"
 diff --git a/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigHii.vfr b/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigHii.vfr
-index 81f871a..02f78e9 100644
+index 81f871a9..02f78e92 100644
 --- a/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigHii.vfr
 +++ b/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigHii.vfr
 @@ -80,6 +80,11 @@ formset
@@ -465,17 +461,10 @@ index 81f871a..02f78e9 100644
          questionid = KEY_DGPU_DT_EFIFB_SUPPORT,
          prompt = STRING_TOKEN(STR_DT_DGPU_EFIFB_PROMPT),
 diff --git a/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigHiiMap.uni b/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigHiiMap.uni
-index 0932ebc..512c0dd 100644
+index 0932ebc0..fc4dc3ed 100644
 --- a/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigHiiMap.uni
 +++ b/Silicon/NVIDIA/Drivers/NvidiaConfigDxe/NvidiaConfigHiiMap.uni
-@@ -37,12 +37,18 @@
- #string STR_ENABLED_PCIE_NIC_TOPOLOGY_PROMPT    #language x-UEFI-redfish-Bios.v1_2_0 "/Bios/Attributes/EnablePcieNicTopology"
- 
- #string STR_L4T_BOOTMODE_PROMPT                 #language x-UEFI-redfish-Bios.v1_2_0 "/Bios/Attributes/L4tBootMode"
-+
- #string STR_L4T_BOOTMODE_GRUB                   #language x-UEFI-redfish-Bios.v1_2_0 "Grub"
- #string STR_L4T_BOOTMODE_DIRECT                 #language x-UEFI-redfish-Bios.v1_2_0 "ExtLinux"
- #string STR_L4T_BOOTMODE_BOOTIMG                #language x-UEFI-redfish-Bios.v1_2_0 "KernelPartition"
+@@ -43,6 +43,11 @@
  #string STR_L4T_BOOTMODE_RECOVERY               #language x-UEFI-redfish-Bios.v1_2_0 "RecoveryPartition"
  #string STR_L4T_BOOTMODE_DEFAULT                #language x-UEFI-redfish-Bios.v1_2_0 "ApplicationDefault"
  
@@ -488,7 +477,7 @@ index 0932ebc..512c0dd 100644
  #string STR_EGM_ENABLE_PROMPT                   #language x-UEFI-redfish-Bios.v1_2_0 "/Bios/Attributes/EGM"
  #string STR_EGM_HV_RESERVED_SIZE_PROMPT         #language x-UEFI-redfish-Bios.v1_2_0 "/Bios/Attributes/EGMHypervisorReservedMemory"
 diff --git a/Silicon/NVIDIA/Include/NVIDIAConfiguration.h b/Silicon/NVIDIA/Include/NVIDIAConfiguration.h
-index 8a8a69f..9678dfa 100644
+index 8a8a69f2..9678dfa8 100644
 --- a/Silicon/NVIDIA/Include/NVIDIAConfiguration.h
 +++ b/Silicon/NVIDIA/Include/NVIDIAConfiguration.h
 @@ -29,8 +29,15 @@
@@ -519,7 +508,7 @@ index 8a8a69f..9678dfa 100644
    BOOLEAN    BoardRecoveryBoot;
  } NVIDIA_BOARD_RECOVERY_BOOT;
 diff --git a/Silicon/NVIDIA/NVIDIA.dec b/Silicon/NVIDIA/NVIDIA.dec
-index b39b53a..5952941 100644
+index b39b53ab..5952941c 100644
 --- a/Silicon/NVIDIA/NVIDIA.dec
 +++ b/Silicon/NVIDIA/NVIDIA.dec
 @@ -687,6 +687,11 @@
@@ -535,7 +524,7 @@ index b39b53a..5952941 100644
    #Type02 Data
    gNVIDIATokenSpaceGuid.PcdBoardChassisLocation|L""|VOID*|0x00000051
 diff --git a/Silicon/NVIDIA/Tegra/DeviceTree/L4TConfiguration.dts b/Silicon/NVIDIA/Tegra/DeviceTree/L4TConfiguration.dts
-index 7e0fe4d..4d68d77 100644
+index 7e0fe4d8..4d68d77d 100644
 --- a/Silicon/NVIDIA/Tegra/DeviceTree/L4TConfiguration.dts
 +++ b/Silicon/NVIDIA/Tegra/DeviceTree/L4TConfiguration.dts
 @@ -47,7 +47,12 @@
@@ -552,6 +541,3 @@ index 7e0fe4d..4d68d77 100644
  								runtime;
  								non-volatile;
  							};
--- 
-2.43.0
-
