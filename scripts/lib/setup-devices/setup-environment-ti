@@ -42,6 +42,7 @@ if [ ! -e "conf/bblayers.conf" ]; then
   cat <<EOF >>conf/bblayers.conf
 BBLAYERS += " \\
     \${OEROOT}/sources/meta-virtualization \\
+    \${OEROOT}/sources/meta-security \\
     \${OEROOT}/sources/meta-openembedded/meta-networking \\
     \${OEROOT}/sources/meta-openembedded/meta-python \\
     \${OEROOT}/sources/meta-openembedded/meta-oe \\
