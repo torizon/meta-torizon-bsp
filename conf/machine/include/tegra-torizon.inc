@@ -5,7 +5,7 @@ TEGRA_ESSENTIAL_EXTRA_RDEPENDS:remove = " \
 OSTREE_KERNEL_ARGS:append = " ${KERNEL_ARGS} root=/dev/${TNSPEC_BOOTDEV} rootfstype=ext4 rootwait"
 
 IMAGE_TEGRAFLASH_KERNEL = "${DEPLOY_DIR_IMAGE}/tegra-minimal-initramfs-${MACHINE}.cboot"
-IMAGE_TEGRAFLASH_FS_TYPE = "ota-ext4"
+IMAGE_TEGRAFLASH_FS_TYPE:tegra = "ota-ext4"
 
 BBMASK += "meta-tegra/external/sota/recipes-bsp/uefi/edk2-firmware-tegra_%.bbappend"
 

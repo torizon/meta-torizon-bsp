@@ -72,7 +72,7 @@ $ tar --zstd -xf <builddir>/deploy/images/<machine>/torizon-docker-<machine>.teg
 
 > [!WARNING]
 > **Always check the extracted rootfs image before you flash.** The rootfs
-> `.ext4` is a large sparse image, and a truncated or interrupted extraction
+> `.ota-ext4` is a large sparse image, and a truncated or interrupted extraction
 > — a missing `zstd` binary, not enough free disk space, or a `tar` that
 > mishandles sparse files — **silently** produces a short file. That file
 > **flashes without any error**, but the target then **fails to boot**,
@@ -88,7 +88,7 @@ $ tar --zstd -xf <builddir>/deploy/images/<machine>/torizon-docker-<machine>.teg
 > check below and **confirm it passes before flashing**:
 >
 > ```
-> $ e2fsck -fn torizon-docker.ext4
+> $ e2fsck -fn torizon-docker.ota-ext4
 > ```
 >
 > It must complete with **no errors**. If it reports a corrupt journal or a
