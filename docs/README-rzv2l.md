@@ -7,13 +7,13 @@ $ cd rz-community-bsp
 ```
 2. Clone `meta-torizon` and `meta-torizon-bsp` into the `rz-community-bsp` folder
 ```
-$ git clone https://github.com/torizon/meta-torizon.git -b master
-$ git clone https://github.com/torizon/meta-torizon-bsp.git -b master
+$ git clone https://github.com/torizon/meta-torizon.git -b wrynose-8.x.y
+$ git clone https://github.com/torizon/meta-torizon-bsp.git -b wrynose-8.x.y
 ```
 3. Clone Torizon dependencies into `rz-community-bsp`
 ```
-$ git clone https://github.com/uptane/meta-updater.git -b master
-$ git clone https://git.yoctoproject.org/meta-virtualization -b master
+$ git clone https://github.com/uptane/meta-updater.git -b wrynose
+$ git clone https://git.yoctoproject.org/meta-virtualization -b wrynose
 ```
 4. Create a symlink to our `setup-environment`:
 ```bash

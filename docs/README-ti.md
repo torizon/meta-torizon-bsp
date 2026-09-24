@@ -4,13 +4,13 @@ Setup
 2. Initialize and sync the repo manifest for Texas Instruments:
 ```bash
 $ mkdir common-torizon; cd common-torizon
-$ repo init -u https://git.toradex.com/toradex-manifest.git -b scarthgap-7.x.y -m common-torizon/ti/default.xml
+$ repo init -u https://github.com/torizon/manifest.git -b wrynose-8.x.y -m torizon/ti/release.xml
 $ repo sync -j 10
 ```
 > Manifests for Wrynose are still under development
 
-We **strongly recommend** using the `default.xml` manifest. The `integration.xml` and `next.xml` are development manifests used internally and they might be unstable.
-`default.xml` is the manifest used for our releases, so they are reliable.  
+We **strongly recommend** using the `release.xml` manifest. The `integration.xml` and `next.xml` are development manifests used internally and they might be unstable.
+`release.xml` is the manifest used for our releases, so they are reliable.
 > [!IMPORTANT]  
 > Common Torizon OS is only available on branches `scarthgap-7.x.y` or newer!
 
@@ -65,29 +65,29 @@ $ mkdir sources; cd sources
 2. Clone the necessary layers to build the Common Torizon image for the TI boards:
   * Download Bitbake:
 ```bash
-$ git clone https://git.openembedded.org/bitbake -b 2.8
-$ cd bitbake && git checkout 6c2641f7a9 && cd ..
+$ git clone https://git.openembedded.org/openembedded-core -b wrynose oe-core
+$ git clone https://git.openembedded.org/bitbake -b 2.18 oe-core/bitbake
 ```
   * Download `meta-yocto`:
 ```bash
-$ git clone https://git.yoctoproject.org/meta-yocto -b scarthgap
+$ git clone https://git.yoctoproject.org/meta-yocto -b wrynose
 ```
   * Download `meta-ti` and its dependencies:
 ```bash
-$ git clone https://git.yoctoproject.org/meta-ti -b master
-$ git clone https://git.yoctoproject.org/meta-arm -b master
-$ git clone https://git.yoctoproject.org/openembedded-core -b master oe-core
+$ git clone https://git.yoctoproject.org/meta-ti -b wrynose
+$ git clone https://git.yoctoproject.org/meta-arm -b wrynose
 ```
   * Download `meta-torizon`, `meta-torizon-bsp`, and their dependencies:
 ```bash
-$ git clone https://github.com/torizon/meta-torizon.git -b master
-$ git clone https://github.com/torizon/meta-torizon-bsp.git -b master
-$ git clone https://github.com/uptane/meta-updater.git -b master
-$ git clone https://git.yoctoproject.org/meta-virtualization -b master
+$ git clone https://github.com/torizon/meta-torizon.git -b wrynose-8.x.y
+$ git clone https://github.com/torizon/meta-torizon-bsp.git -b wrynose-8.x.y
+$ git clone https://github.com/uptane/meta-updater.git -b wrynose
+$ git clone https://git.yoctoproject.org/meta-virtualization -b wrynose
+$ git clone https://git.yoctoproject.org/meta-security -b wrynose
 ```
   * And finally, download the dependency for `meta-updater` and `meta-virtualization`:
 ```bash
-$ git clone https://github.com/openembedded/meta-openembedded -b master
+$ git clone https://github.com/openembedded/meta-openembedded -b wrynose
 ```
   * Go back to our top folder `common-torizon`;
   * Create a symlink to our `setup-environment`:

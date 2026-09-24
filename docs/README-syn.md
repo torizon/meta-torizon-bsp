@@ -4,13 +4,10 @@ Setup
 2. Initialize and sync the repo manifest for Synaptics:
 ```bash
 $ mkdir common-torizon; cd common-torizon
-$ repo init -u https://git.toradex.com/toradex-manifest.git -b scarthgap-7.x.y -m common-torizon/syn/integration.xml
+$ repo init -u https://github.com/torizon/manifest.git -b wrynose-8.x.y -m torizon/syn/integration.xml
 $ repo sync -j 10
 ```
 > Manifests for Wrynose are still under development
-
-> [!IMPORTANT]
-> Until an official release of Common Torizon OS, only the `integration.xml` manifest is suitable for end-users to build. After an official release, users will be able to use the `default.xml` manifest.
 
 Note that `integration.xml` is a development manifest used internally and it might contain development features and thus be considered unstable.
 
@@ -109,7 +106,12 @@ $ mkdir common-torizon; cd common-torizon
 2. Clone the necessary layers to build the Common Torizon image for the Synaptics boards:
   * Download Synaptics SDK:
 
-    Obs. It is recommended to use the latest version of synaptics-astra sdk. You can get it in their release repository: [https://github.com/synaptics-astra/sdk/releases](https://github.com/synaptics-astra/sdk/releases)
+    Obs. It is recommended to use the latest version of synaptics-astra sdk. You can get it in their release repository: [https://github.com/synaptics-astra/sdk/releases](https://github.com/synaptics-astra/sdk/releases).
+
+> **IMPORTANT**
+>
+> It is necessary to wait for Synaptics to release their Wrynose branch before it is possible to build an image for any supported Synaptics machine. Their latest release is still based on Scarthgap.
+
 ```bash
 $ git clone https://github.com/synaptics-astra/sdk.git -b scarthgap_6.12_<last_release_version> layers
 ```
@@ -121,9 +123,9 @@ $ git clone https://github.com/synaptics-astra/sdk.git -b scarthgap_6.12_v2.1.0 
   * Download `meta-torizon`, `meta-torizon-bsp`, and their dependencies:
 ```bash
 $ cd layers
-$ git clone https://github.com/torizon/meta-torizon.git -b master
-$ git clone https://github.com/torizon/meta-torizon-bsp.git -b master
-$ git clone https://github.com/uptane/meta-updater.git -b master
+$ git clone https://github.com/torizon/meta-torizon.git -b wrynose-8.x.y
+$ git clone https://github.com/torizon/meta-torizon-bsp.git -b wrynose-8.x.y
+$ git clone https://github.com/uptane/meta-updater.git -b wrynose
 ```
   * Go back to our top folder `common-torizon`;
   * Create a symlink to our `setup-environment`:
