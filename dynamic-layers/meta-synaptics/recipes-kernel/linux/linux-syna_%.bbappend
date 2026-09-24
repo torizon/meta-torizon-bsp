@@ -3,13 +3,20 @@ require recipes-kernel/linux/linux-torizon.inc
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI += " \
-    file://fragment.cfg \
+    file://synaptics-core.cfg \
+    file://synaptics-community.cfg \
 "
 
-# Enable SDIO support in the device tree for Luna SL1680
+# luna-sl1680.conf adds 'sl1680' to its own MACHINEOVERRIDES, so a
+# SRC_URI:append:sl1680 override would also reach Luna. Test MACHINE directly
+# to keep these fragments scoped to the SL1680 vendor board only.
+SRC_URI:append = "${@bb.utils.contains('MACHINE', 'sl1680', ' file://sl1680-core.cfg file://sl1680-community.cfg', '', d)}"
+
+# SDIO support in the device tree, and kernel configuration fragments, for Luna SL1680
 SRC_URI:append:luna-sl1680 = " \
     file://0001-dolphin-rdk.dts-enable-sdio-connection.patch \
-    file://luna-sl1680.cfg \
+    file://luna-sl1680-core.cfg \
+    file://luna-sl1680-community.cfg \
     file://0001-dhd_linux-fix-issue-which-freezes-sl1680-chips-board.patch;patchdir=drivers/synaptics \
 "
 
