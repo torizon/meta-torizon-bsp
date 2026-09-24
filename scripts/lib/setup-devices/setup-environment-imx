@@ -78,6 +78,7 @@ tdx_append_once conf/bblayers.conf "# Torizon" <<EOF
 BBLAYERS += "\${BSPDIR}/sources/meta-torizon-bsp"
 BBLAYERS += "\${BSPDIR}/sources/meta-torizon"
 BBLAYERS += "\${BSPDIR}/sources/meta-updater"
+BBLAYERS += "\${BSPDIR}/sources/meta-security"
 
 OEROOT := "\${@os.path.abspath(os.path.dirname(d.getVar('FILE', True)))}/../.."
 EOF
