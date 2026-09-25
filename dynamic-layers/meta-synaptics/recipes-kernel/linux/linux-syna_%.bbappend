@@ -35,3 +35,4 @@ do_patch:append:luna-sl1680() {
 # Synaptics kernel recipe is overwriting INITRAMFS_IMAGE
 # We need to set it back to initramfs-ostree-torizon-image
 INITRAMFS_IMAGE = "initramfs-ostree-torizon-image"
+
