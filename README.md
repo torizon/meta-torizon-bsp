@@ -45,10 +45,10 @@ following general process:
 1. Clone both Torizon OS layers and their common dependencies:
 
    ```bash
-   git clone https://github.com/torizon/meta-torizon.git -b master
-   git clone https://github.com/torizon/meta-torizon-bsp.git -b master
-   git clone https://github.com/uptane/meta-updater.git -b master
-   git clone https://git.yoctoproject.org/meta-virtualization -b master
+   git clone https://github.com/torizon/meta-torizon.git -b wrynose-8.x.y
+   git clone https://github.com/torizon/meta-torizon-bsp.git -b wrynose-8.x.y
+   git clone https://github.com/uptane/meta-updater.git -b wrynose
+   git clone https://git.yoctoproject.org/meta-virtualization -b wrynose
    ```
 
 2. Download the BSP and remaining dependencies required by your machine. The
