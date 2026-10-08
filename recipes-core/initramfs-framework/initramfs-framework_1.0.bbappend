@@ -7,7 +7,7 @@ SRC_URI:remove:tegra = "\
 # in the same order they are added to this variable!
 
 # Modules necessary for our Verdin iMX8M(M|P) to display splash screen.
-INITRAMFS_EXTRA_KMODS:mx8-nxp-bsp = "\
+INITRAMFS_EXTRA_KMODS:append:mx8-nxp-bsp = "\
     fsl_imx_ldb \
     imx8mp_ldb \
     phy_fsl_imx8mp_lvds \
@@ -22,7 +22,7 @@ INITRAMFS_EXTRA_KMODS:mx8-nxp-bsp = "\
 INITRAMFS_EXTRA_KMODS:prepend:toradex-smarc-imx8mp = "i2c_mux_pca954x "
 
 # Modules necessary for our TI modules to display splash screen.
-INITRAMFS_EXTRA_KMODS:ti-soc = "\
+INITRAMFS_EXTRA_KMODS:append:ti-soc = "\
     pwm_tiehrpwm \
     tidss \
     display_connector \
@@ -71,7 +71,7 @@ INITRAMFS_EXTRA_KMODS:append:mx93-nxp-bsp:tdx = "\
 "
 
 # Modules necessary for our i.MX95 SoMs to display splash screen.
-INITRAMFS_EXTRA_KMODS:mx95-nxp-bsp = "\
+INITRAMFS_EXTRA_KMODS:append:mx95-nxp-bsp = "\
     phy_fsl_imx8mp_lvds \
     pwm_imx_tpm \
     imx95_ldb \
