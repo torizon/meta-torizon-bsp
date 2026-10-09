@@ -4,9 +4,10 @@ MediaTek Genio 1200 (Adlink LEC-MTK-i1200 / I-Pi SMARC 1200)
 This describes how to build Common Torizon OS for the Adlink LEC-MTK-i1200 SoM
 (MediaTek Genio 1200 / MT8395 SoC) on the I-Pi SMARC 1200 carrier board.
 
-The MediaTek and Adlink dependency layers come from MediaTek's IoT Yocto
-**v25.0** release, which is the **scarthgap** line (kernel 6.6) and matches
-the scarthgap Torizon base.
+> [!IMPORTANT]
+>
+> MediaTek's IoT Yocto **v25.0** release is based on **Scarthgap** (kernel 6.6).
+> Wrynose builds will not work until MediaTek publishes a Wrynose-compatible BSP release.
 
 Setup
 ======
@@ -28,9 +29,9 @@ $ cd ~
 $ mkdir ~/yocto-workdir
 $ cd ~/yocto-workdir
 ```
-4. Initialize the Torizon repository:
+4. Initialize the Torizon repository (Until MediaTek releases a Wrynose-compatible BSP we'll use a placeholder here):
 ```
-$ repo init -u https://git.toradex.com/toradex-manifest.git -b master -m torizon/mediatek/integration.xml
+$ repo init -u https://github.com/torizon/manifest.git -b wrynose-8.x.y -m torizon/mtk/next.xml
 ```
 5. Sync the repositories:
 ```
@@ -42,7 +43,7 @@ Build
 1. Use the Docker container provided by Toradex to set up the build environment
    in the work directory `~/yocto-workdir` prepared in the previous steps:
 ```
-$ docker run --rm -it --name=crops -v ~/yocto-workdir:/workdir --workdir=/workdir torizon/crops:scarthgap-7.x.y /bin/bash
+$ docker run --rm -it --name=crops -v ~/yocto-workdir:/workdir --workdir=/workdir torizon/crops:wrynose-8.x.y /bin/bash
 ```
 2. Repeat the step of configuring the Git user name and e-mail:
 ```
@@ -119,7 +120,7 @@ Boot
    console:
 ```
 ...
-Common Torizon OS 7.x.y-devel-<timestamp> torizon-lec-mtk-i1200-ufs ttyS0
+Common Torizon OS 8.x.y-devel-<timestamp> torizon-lec-mtk-i1200-ufs ttyS0
 
 torizon-lec-mtk-i1200-ufs login:
 

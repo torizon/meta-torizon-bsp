@@ -20,7 +20,7 @@ $ cd ~/yocto-workdir
 ```
 4. Initialize the Torizon repository:
 ```
-$ repo init -u https://git.toradex.com/toradex-manifest.git -b scarthgap-7.x.y -m torizon/default.xml
+$ repo init -u https://github.com/torizon/manifest.git -b wrynose-8.x.y -m torizon/tdx/release.xml
 ```
 > Manifests for Wrynose are still under development
 5. Sync the repositories:
@@ -29,14 +29,14 @@ $ repo sync
 ```
 6. Download the ST32MP BSP layer:
 ```
-$ git -C layers clone -b openstlinux-6.6-yocto-scarthgap-mpu-v25.03.19 https://github.com/STMicroelectronics/meta-st-stm32mp
+$ git -C layers clone -b wrynose_v26.02.18 https://github.com/STMicroelectronics/meta-st-stm32mp
 ```
 
 Build
 ======
 1. Use the Docker container provided by Toradex to setup the build environment in the work directory ~/yocto-workdir prepared in previous steps:
 ```
-$ docker run --rm -it --name=crops -v ~/yocto-workdir:/workdir --workdir=/workdir torizon/crops:scarthgap-7.x.y /bin/bash
+$ docker run --rm -it --name=crops -v ~/yocto-workdir:/workdir --workdir=/workdir torizon/crops:wrynose-8.x.y /bin/bash
 ```
 2. Repeat the step of configuring the Git user name and e-mail:
 ```

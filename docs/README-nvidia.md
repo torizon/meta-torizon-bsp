@@ -20,10 +20,10 @@ $ cd ~/yocto-workdir
 ```
 4. Initialize the Torizon repository:
 ```
-$ repo init -u https://git.toradex.com/toradex-manifest.git -b wrynose-7.x.y -m common-torizon/nvidia/integration.xml
+$ repo init -u https://github.com/torizon/manifest.git -b wrynose-8.x.y -m torizon/nvidia/integration.xml
 ```
 > [!IMPORTANT]
-> Until an official release of Common Torizon OS for NVIDIA Jetson Orin Nano, only the `integration.xml` manifest is suitable for end-users to build. After an official release, users will be able to use the `default.xml` manifest.
+> Until an official release of Common Torizon OS for NVIDIA Jetson Orin Nano, only the `integration.xml` manifest is suitable for end-users to build. After an official release, users will be able to use the `release.xml` manifest.
 
 Note that `integration.xml` is a development manifest that may contain unfinished features and should therefore be considered unstable.
 
@@ -36,7 +36,7 @@ Build
 ======
 1. Use the Docker container provided by Toradex to setup the build environment in the work directory `~/yocto-workdir` prepared in previous steps:
 ```
-$ docker run --rm -it --name=crops -v ~/yocto-workdir:/workdir --workdir=/workdir torizon/crops:wrynose-7.x.y /bin/bash
+$ docker run --rm -it --name=crops -v ~/yocto-workdir:/workdir --workdir=/workdir torizon/crops:wrynose-8.x.y /bin/bash
 ```
 2. Repeat the step of configuring the Git user name and e-mail:
 ```
