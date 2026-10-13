@@ -93,6 +93,7 @@ CORE_IMAGE_BASE_INSTALL:append:aquila-am69 = " \
 
 CORE_IMAGE_BASE_INSTALL:append:mx95-nxp-bsp = " \
     ${@bb.utils.contains("DISTROOVERRIDES", "common-torizon-distro", "mali-imx", "",d)} \
+    ${@bb.utils.contains("BBFILE_COLLECTIONS", "imx-machine-learning", "neutron", "",d)} \
 "
 
 CORE_IMAGE_BASE_INSTALL:append:verdin-imx95 = " \
