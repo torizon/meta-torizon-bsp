@@ -9,7 +9,8 @@ IMAGE_TEGRAFLASH_FS_TYPE:tegra = "ota-ext4"
 
 BBMASK += "meta-tegra/external/sota/recipes-bsp/uefi/edk2-firmware-tegra_%.bbappend"
 
-do_image_tegraflash_tar[depends] += " tegra-minimal-initramfs:do_image_complete"
+do_image_tegraflash_tar[depends] += " tegra-minimal-initramfs:do_image_complete \
+                                     nvidia2img-tools:do_deploy"
 
 MACHINE_EXTRA_RDEPENDS:remove = " tegra-redundant-boot"
 
@@ -18,3 +19,11 @@ HAS_REDUNDANT_PARTITION_LAYOUT_EXTERNAL = "0"
 
 PREFERRED_PROVIDER_u-boot-fw-utils = "u-boot-fw-utils-tegra-emul"
 PREFERRED_RPROVIDER_u-boot-fw-utils = "u-boot-fw-utils-tegra-emul"
+
+# Dedicated override function from image_types_tegra.bbclass
+# Add conversion scripts for tegraflash format
+tegraflash_custom_pre:append() {
+    for script in tegra2img img2tegra; do
+        cp ${DEPLOY_DIR_IMAGE}/nvidia2img-tools/${script}.pyz .
+    done
+}
