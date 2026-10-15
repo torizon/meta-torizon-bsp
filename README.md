@@ -34,6 +34,7 @@ Start with the machine-specific build instructions below:
 | MediaTek | ADLINK LEC-MTK-i1200 | [README-genio.md](./docs/README-genio.md) | N/A |
 | NVIDIA | Jetson Orin Nano | [README-nvidia.md](./docs/README-nvidia.md) | N/A |
 | NXP | i.MX 95 Verdin EVK, FRDM i.MX 93 and SABRE-SD i.MX 6SoloX | [README-nxp.md](./docs/README-nxp.md) | One-off Common Torizon images for [i.MX 95 Verdin EVK](https://artifacts.toradex.com/artifactory/legacy-oe-prod-frankfurt/i.MX95_EVKImage-Torizon_OS_7.0.0/) and [FRDM i.MX 93](https://artifacts.toradex.com/artifactory/legacy-oe-prod-frankfurt/i.MX93_FRDM-Torizon_OS_7.5.0/) |
+| Qualcomm | Arduino VENTUNO Q | [README-qcom.md](./docs/README-qcom.md) | N/A |
 | Renesas | RZ/V2L EVKIT | [README-rzv2l.md](./docs/README-rzv2l.md) | N/A |
 | STMicroelectronics | STM32MP1/STM32MP2 | [README-stm32mp.md](./docs/README-stm32mp.md) | N/A |
 | Synaptics | Astra SL1680/Luna SL1680 | [README-syn.md](./docs/README-syn.md) | N/A |

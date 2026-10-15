@@ -1,0 +1,73 @@
+From: Stefano Viola <stefano.viola@toradex.com>
+Subject: [PATCH] misc: fastrpc: drop leftover invoke contexts on release
+
+Invoke contexts hold a reference to their fastrpc_user. The contexts
+left on fl->pending or fl->interrupted by a timed out or interrupted
+invoke were only dropped in fastrpc_user_free(), which cannot run while
+they hold that reference: the user, its maps and their IOVA space then
+leak until reboot, and the next process runs out of address space on
+the same context banks (seen with Qualcomm Genie: the second LLM load
+fails with "failed to map buffer").
+
+Drop those contexts in fastrpc_device_release(), once the DSP process
+is released. fastrpc_user_free() then runs when the last reference goes
+and frees the maps and buffers as before; its context loops are
+removed, as no context can be left by then.
+
+Upstream-Status: Pending
+Signed-off-by: Stefano Viola <stefano.viola@toradex.com>
+---
+--- a/drivers/misc/fastrpc.c
++++ b/drivers/misc/fastrpc.c
+@@ -517,23 +517,12 @@ static void fastrpc_context_put(struct fastrpc_invoke_ctx *ctx);
+ static void fastrpc_user_free(struct kref *ref)
+ {
+ 	struct fastrpc_user *fl = container_of(ref, struct fastrpc_user, refcount);
+-	struct fastrpc_invoke_ctx *ctx, *n;
+ 	struct fastrpc_map *map, *m;
+ 	struct fastrpc_buf *buf, *b;
+ 
+ 	if (fl->init_mem)
+ 		fastrpc_buf_free(fl->init_mem);
+ 
+-	list_for_each_entry_safe(ctx, n, &fl->pending, node) {
+-		list_del(&ctx->node);
+-		fastrpc_context_put(ctx);
+-	}
+-
+-	list_for_each_entry_safe(ctx, n, &fl->interrupted, node) {
+-		list_del(&ctx->node);
+-		fastrpc_context_put(ctx);
+-	}
+-
+ 	list_for_each_entry_safe(map, m, &fl->maps, node)
+ 		fastrpc_map_put(map);
+ 
+@@ -1766,10 +1755,27 @@ static int fastrpc_device_release(struct inode *inode, struct file *file)
+ {
+ 	struct fastrpc_user *fl = (struct fastrpc_user *)file->private_data;
+ 	struct fastrpc_channel_ctx *cctx = fl->cctx;
++	struct fastrpc_invoke_ctx *ctx, *n;
+ 	unsigned long flags;
++	LIST_HEAD(ctxs);
+ 
+ 	fastrpc_release_current_dsp_process(fl);
+ 
++	/*
++	 * Contexts left by a timed out or interrupted invoke hold a reference
++	 * to fl, so fastrpc_user_free() cannot run while they exist: drop them
++	 * now that the DSP process is released.
++	 */
++	spin_lock(&fl->lock);
++	list_splice_init(&fl->pending, &ctxs);
++	list_splice_init(&fl->interrupted, &ctxs);
++	spin_unlock(&fl->lock);
++
++	list_for_each_entry_safe(ctx, n, &ctxs, node) {
++		list_del(&ctx->node);
++		fastrpc_context_put(ctx);
++	}
++
+ 	spin_lock_irqsave(&cctx->lock, flags);
+ 	list_del(&fl->user);
+ 	spin_unlock_irqrestore(&cctx->lock, flags);
