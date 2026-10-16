@@ -33,6 +33,7 @@ MACHINE_EXTRA_RRECOMMENDS:remove:imx = "imx-alsa-plugins"
 # Compatibility with Toradex BSP layers
 BBMASK += " \
     /meta-freescale/recipes-graphics/cairo \
+    /meta-imx/meta-imx-ml/recipes-bsp/ara2 \
 "
 
 # Load Torizon-only BSP metadata after torizon.inc selects its distro family.
