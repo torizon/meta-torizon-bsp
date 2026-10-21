@@ -1,0 +1,40 @@
+From: Stefano Viola <stefano.viola@toradex.com>
+Subject: [PATCH] arm64: dts: qcom: monaco-arduino-monza: power the Wi-Fi/BT module
+
+The QCA2066 Wi-Fi/Bluetooth module stays off: no PCIe device on pcie1
+and the Bluetooth driver times out reading the QCA version. Arduino's
+images hog TLMM GPIO 54 (module enable, rfkill) and GPIO 56 (PCIe
+always-on supply) high. Do the same, so the module is powered before
+the PCIe links are trained at probe.
+
+Upstream-Status: Inappropriate [stopgap until meta-qcom-arduino's QCA2066 power-sequencing support (PR #22, main) reaches wrynose]
+Signed-off-by: Stefano Viola <stefano.viola@toradex.com>
+---
+--- a/arch/arm64/boot/dts/qcom/monaco-arduino-monza.dts
++++ b/arch/arm64/boot/dts/qcom/monaco-arduino-monza.dts
+@@ -472,6 +472,25 @@
+ };
+ 
+ &tlmm {
++	/*
++	 * Power the Wi-Fi/Bluetooth module (QCA2066) at boot, before the PCIe
++	 * links are trained at probe: module enable (rfkill) and PCIe always-on
++	 * supply, as on Arduino's images.
++	 */
++	wlan-rfkill-hog {
++		gpio-hog;
++		gpios = <54 GPIO_ACTIVE_HIGH>;
++		output-high;
++		line-name = "wlan-rfkill";
++	};
++
++	wireless-pcie-ao-hog {
++		gpio-hog;
++		gpios = <56 GPIO_ACTIVE_HIGH>;
++		output-high;
++		line-name = "wireless-pcie-ao";
++	};
++
+ 	pcie0_default_state: pcie0-default-state {
+ 		wake-pins {
+ 			pins = "gpio0";
