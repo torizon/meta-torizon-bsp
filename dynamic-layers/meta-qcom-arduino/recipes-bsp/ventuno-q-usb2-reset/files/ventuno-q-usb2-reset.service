@@ -1,0 +1,14 @@
+[Unit]
+Description=VENTUNO Q: restart the MCU USB controller once at boot
+# usb_2 comes up unable to detect the MCU (cause unknown): rebind it once,
+# late in boot. An early rebind is not reliable; after multi-user.target it
+# works with and without the USB gadget (android-tools-adbd)
+After=multi-user.target android-tools-adbd.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/ventuno-q-usb2-reset
+
+[Install]
+WantedBy=multi-user.target

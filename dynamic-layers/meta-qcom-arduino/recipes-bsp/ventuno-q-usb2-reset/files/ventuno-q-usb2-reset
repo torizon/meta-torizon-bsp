@@ -1,0 +1,22 @@
+#!/bin/sh
+# The VENTUNO Q MCU (serial, CAN) is on usb_2, which comes up unable to see
+# any device (cause unknown); rebinding the controller fixes it. Do it once,
+# before anything uses the MCU, until the kernel issue is fixed.
+DEV=a400000.usb
+P=/sys/bus/platform/devices/$DEV
+
+i=0
+while [ ! -e "$P/driver" ] && [ $i -lt 100 ]; do
+    sleep 0.1
+    i=$((i + 1))
+done
+if [ ! -e "$P/driver" ]; then
+    echo "$DEV: no driver bound, nothing to do"
+    exit 0
+fi
+
+drv=$(readlink -f "$P/driver")
+echo "$DEV" > "$drv/unbind"
+sleep 1
+echo "$DEV" > "$drv/bind"
+echo "$DEV: controller restarted"

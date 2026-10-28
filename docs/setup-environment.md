@@ -18,6 +18,7 @@ scripts/lib/
     setup-environment-imx
     setup-environment-mtk
     setup-environment-nvidia
+    setup-environment-qcom
     setup-environment-renesas
     setup-environment-stm32mp
     setup-environment-synaptics
@@ -72,7 +73,7 @@ Grouped by concern - see the function's own doc comment in `core.sh` for full pa
 Two vendor-script behaviors
 ---------------------------
 
-- **Native** (`toradex`, `nvidia`, `stm32mp`, `mtk`): the script builds `conf/local.conf`/`conf/bblayers.conf`/`conf/auto.conf`/`conf/site.conf` itself, with checksum-gated caching via `tdx_native_conf_is_current` so re-sourcing with unchanged MACHINE/DISTRO is a fast no-op.
+- **Native** (`toradex`, `nvidia`, `stm32mp`, `mtk`, `qcom`): the script builds `conf/local.conf`/`conf/bblayers.conf`/`conf/auto.conf`/`conf/site.conf` itself, with checksum-gated caching via `tdx_native_conf_is_current` so re-sourcing with unchanged MACHINE/DISTRO is a fast no-op.
 - **Delegating** (`ti`, `intel`, `imx`, `synaptics`): the script `source`s the vendor's own env-setup tooling first (poky's `oe-init-build-env`, NXP's `imx-setup-release.sh`, etc.), then patches the result with `tdx_needs_once`/`tdx_append_once`/`tdx_apply_integration_override`.
 - `renesas` is a documented special case: it assumes a container/kas-based flow has already created a base `/build/conf/*`, so it skips the bootstrap functions entirely and just patches those fixed paths.
 
