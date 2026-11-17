@@ -1,0 +1,85 @@
+From 8e2e8fe7f981ec6fd1ef6cb5c2d2541c0b2b37e5 Mon Sep 17 00:00:00 2001
+From: Eduardo Ferreira <eduardo.barbosa@toradex.com>
+Date: Tue, 17 Nov 2026 11:02:49 -0300
+Subject: L4TLauncher: skip device tree overlays that fail to apply
+
+A missing or broken overlay fails the whole boot entry. On a Jetson
+Orin Nano running Torizon this left the board at the UEFI setup menu,
+where the boot counter never expires and rollback never happens. We
+skip the overlay instead, as U-Boot does, restoring the device tree if
+a failed apply left it half-modified.
+
+With Secure Boot enabled, an overlay that fails to load still fails the
+boot entry, as that can be a failed signature check.
+
+Upstream-Status: Inappropriate [Torizon OS specific]
+
+Signed-off-by: Eduardo Ferreira <eduardo.barbosa@toradex.com>
+---
+ .../Application/L4TLauncher/L4TLauncher.c     | 39 +++++++++++++------
+ 1 file changed, 28 insertions(+), 11 deletions(-)
+
+diff --git a/Silicon/NVIDIA/Application/L4TLauncher/L4TLauncher.c b/Silicon/NVIDIA/Application/L4TLauncher/L4TLauncher.c
+index 693fee4..517877d 100644
+--- a/Silicon/NVIDIA/Application/L4TLauncher/L4TLauncher.c
++++ b/Silicon/NVIDIA/Application/L4TLauncher/L4TLauncher.c
+@@ -1745,6 +1745,7 @@ ExtLinuxBoot (
+   UINTN                                 OverlaySize;
+   CHAR16                                *Overlays = NULL;
+   CHAR16                                *OverlayPath;
++  VOID                                  *FdtBackup;
+   UINTN                                 Index;
+   CHAR8                                 SWModule[] = "kernel";
+   INTN                                  FdtStatus;
+@@ -1859,24 +1860,40 @@ ExtLinuxBoot (
+                    &OverlayBuffer,
+                    &OverlaySize
+                    );
++        // An overlay that can't be loaded or applied is skipped, as U-Boot
++        // does, instead of failing the boot entry: that would stop at the
++        // UEFI menu, where the boot counter never expires and a Torizon
++        // rollback never happens.
+         if (EFI_ERROR (Status)) {
+           ErrorPrint (L"%a: Failed to load overlay %s: %r\r\n", __FUNCTION__, OverlayPath, Status);
+-          goto Exit;
+-        }
+-
+-        FdtStatus = FdtCheckHeader (OverlayBuffer);
+-        if (FdtStatus != 0) {
++          // With Secure Boot, a load failure can be a failed signature
++          // check, so keep refusing to boot instead of skipping it.
++          if (IsSecureBootEnabled ()) {
++            goto Exit;
++          }
++        } else if ((FdtStatus = FdtCheckHeader (OverlayBuffer)) != 0) {
+           ErrorPrint (L"%a: Overlay %s bad header: %lld\r\n", __FUNCTION__, OverlayPath, FdtStatus);
+-          goto Exit;
++        } else if ((FdtBackup = AllocateCopyPool (FdtTotalSize (ExpandedFdtBase), ExpandedFdtBase)) == NULL) {
++          // Without a backup a failed apply can't be undone, so skip it.
++          ErrorPrint (L"%a: No memory to apply overlay %s\r\n", __FUNCTION__, OverlayPath);
++        } else {
++          // The overlay is applied in place and a failure can leave the fdt
++          // half-modified, so restore the copy taken before applying it.
++          Status = gL4TSupportProtocol->ApplyTegraDeviceTreeOverlay (ExpandedFdtBase, OverlayBuffer, SWModule);
++          if (EFI_ERROR (Status)) {
++            ErrorPrint (L"%a: Failed to apply overlay %s: %r\r\n", __FUNCTION__, OverlayPath, Status);
++            CopyMem (ExpandedFdtBase, FdtBackup, FdtTotalSize (FdtBackup));
++          }
++
++          FreePool (FdtBackup);
+         }
+ 
+-        Status = gL4TSupportProtocol->ApplyTegraDeviceTreeOverlay (ExpandedFdtBase, OverlayBuffer, SWModule);
+-        if (EFI_ERROR (Status)) {
+-          goto Exit;
++        // Nothing was allocated if the overlay failed to load.
++        if (OverlayBuffer != NULL) {
++          FreePool (OverlayBuffer);
++          OverlayBuffer = NULL;
+         }
+ 
+-        FreePool (OverlayBuffer);
+-        OverlayBuffer = NULL;
+         OverlayPath   = &Overlays[Index + 1];
+       }
+ 
