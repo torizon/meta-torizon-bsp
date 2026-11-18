@@ -1,7 +1,3 @@
-RDEPENDS:packagegroup-base-wifi:append:tdx = " \
-    mwifiexap \
-"
-
 RDEPENDS:packagegroup-base-wifi:append:apalis-imx8 = " \
     mwifiex-delay \
 "

@@ -2,6 +2,7 @@ kernel_image_type=@@KERNEL_IMAGETYPE@@
 overlays_file="overlays.txt"
 otaroot=@@OTAROOT_PARTITION_NUMBER@@
 fitconf_fdt_overlays="@@FITCONF_FDT_OVERLAYS@@"
+fitconf_fdt_overlays_noprefix="@@FITCONF_FDT_OVERLAYS_NOPREFIX@@"
 
 set_bootargs=env set bootcmd_args env set bootargs ${defargs} root=@@BOOTARG_ROOT@@ rootfstype=ext4 ${bootargs} ${tdxargs}
 
@@ -24,13 +25,22 @@ set_kernel_load_addr=env set bootcmd_unzip_k ";"; \
                          fi; \
                      fi
 
-load_overlay=load ${devtype} ${devnum}:${otaroot} ${loadaddr} /boot${fdtdir}/${overlays_file}; env import -t ${loadaddr} ${filesize}
+# overlays.txt belongs to the deployment being booted, as the FIT image does,
+# and has the prefix of the overlay configurations of that FIT image, e.g.
+# fdt_overlays_prefix=freescale_ for conf-freescale_<overlay>. This script is
+# always the one of the newest deployment: on a rollback to a release whose
+# overlays.txt has no prefix, the overlays of that FIT image, the predefined
+# ones included, are selected without it, as its own boot script did.
+load_overlay=env set fdt_overlays_prefix; load ${devtype} ${devnum}:${otaroot} ${loadaddr} /boot${fdtdir}/${overlays_file}; env import -t ${loadaddr} ${filesize}
 apply_overlays=if test ${kernel_image_type} = "fitImage"; then \
                    env set fdt_high; \
                    env set fdt_resize true; \
+                   if test -z "${fdt_overlays_prefix}"; then \
+                       env set fitconf_fdt_overlays "${fitconf_fdt_overlays_noprefix}"; \
+                   fi; \
                    for overlay_file in ${fdt_overlays}; do \
                        echo "Applying Overlay: ${overlay_file}"; \
-                       env set fitconf_fdt_overlays "${fitconf_fdt_overlays}"#conf-"${overlay_file}"; \
+                       env set fitconf_fdt_overlays "${fitconf_fdt_overlays}"#conf-"${fdt_overlays_prefix}${overlay_file}"; \
                    done; \
                else \
                    fdt addr ${fdt_addr_r} && fdt resize @@FDT_OVERLAYS_RESIZE@@ && \
