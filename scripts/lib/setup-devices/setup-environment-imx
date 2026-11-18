@@ -36,6 +36,15 @@ fi
 # returns.
 unset DISTRO
 source "${_IMX_SETUP_SCRIPT}" -b "${1:-build-$_TDX_DISTRO}"
+
+# NXP's script enables root login with an empty password, over the serial
+# console and SSH, on every run. That suits NXP's evaluation boards, not
+# Torizon OS images, so turn it off again each time. This runs before
+# DISTRO is restored, so it parses the configuration as NXP's own call did.
+if ! bitbake-config-build disable-fragment core/yocto/root-login-with-empty-password; then
+    echo "WARNING: root login with an empty password is still enabled." >&2
+    echo "Run 'bitbake-config-build disable-fragment core/yocto/root-login-with-empty-password' in the build directory." >&2
+fi
 export DISTRO="${_TDX_DISTRO}"
 
 tdx_set_builddir_from_cwd
