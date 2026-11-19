@@ -1,0 +1,60 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Leonardo Bornia <leonardo.bornia@toradex.com>
+Date: Wed, 18 Nov 2026 10:50:18 -0300
+Subject: [PATCH] arm64: dts: qcom: monaco-monza-som: supply both SerDes rails
+
+The Ethernet SerDes has a 0.9 V (vreg_l4a) and a 1.2 V (vreg_l5a)
+supply. The SoM only gives it vreg_l5a through phy-supply, so nothing
+in Linux keeps vreg_l4a on for the SerDes: the first SerDes
+initialization works on the rail the boot firmware left on, and every
+later one (ip link down/up, the TX watchdog reset after a link change)
+times out on QSERDES_COM_C_READY_STATUS until a reboot.
+
+Name both rails with the vdda-0p9/vdda-1p2 supplies the SerDes PHY
+driver votes for, as qcs8300-ride does in mainline, and document
+vdda-1p2-supply in the binding (from mainline 3719850f1b70).
+
+Upstream-Status: Pending
+Signed-off-by: Leonardo Bornia <leonardo.bornia@toradex.com>
+---
+ .../bindings/phy/qcom,sa8775p-dwmac-sgmii-phy.yaml       | 9 ++++++++-
+ arch/arm64/boot/dts/qcom/monaco-monza-som.dtsi           | 3 ++-
+ 2 files changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/phy/qcom,sa8775p-dwmac-sgmii-phy.yaml b/Documentation/devicetree/bindings/phy/qcom,sa8775p-dwmac-sgmii-phy.yaml
+index 0a1330b91..e573abcb9 100644
+--- a/Documentation/devicetree/bindings/phy/qcom,sa8775p-dwmac-sgmii-phy.yaml
++++ b/Documentation/devicetree/bindings/phy/qcom,sa8775p-dwmac-sgmii-phy.yaml
+@@ -35,10 +35,17 @@ properties:
+   phy-supply:
+     description:
+       Phandle to a regulator that provides power to the PHY.
++    deprecated: true
+ 
+   vdda-0p9-supply:
+     description:
+-      Phandle to a 0.9V regulator supply to the PHY.
++      Phandle to a 0.9V regulator supply to the PHY, which draws a peak
++      current of 46 mA.
++
++  vdda-1p2-supply:
++    description:
++      Phandle to a 1.2V regulator supply to the PHY, which draws a peak
++      current of 15 mA.
+ 
+   "#phy-cells":
+     const: 0
+diff --git a/arch/arm64/boot/dts/qcom/monaco-monza-som.dtsi b/arch/arm64/boot/dts/qcom/monaco-monza-som.dtsi
+index 9b5ed5593..143c6e87d 100644
+--- a/arch/arm64/boot/dts/qcom/monaco-monza-som.dtsi
++++ b/arch/arm64/boot/dts/qcom/monaco-monza-som.dtsi
+@@ -284,7 +284,8 @@ &sdhc_1 {
+ 
+ /* Ethernet/SGMII */
+ &serdes0 {
+-	phy-supply = <&vreg_l5a>;
++	vdda-0p9-supply = <&vreg_l4a>;
++	vdda-1p2-supply = <&vreg_l5a>;
+ 
+ 	status = "okay";
+ };

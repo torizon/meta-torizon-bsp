@@ -1,0 +1,110 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mohd Ayaan Anwar <mohd.anwar@oss.qualcomm.com>
+Date: Wed, 18 Nov 2026 10:49:57 -0300
+Subject: [PATCH] phy: qcom: sgmii-eth: vote for both voltage rails with
+ correct current loads
+
+The SerDes PHY has two voltage supply rails, vdda-0p9 and vdda-1p2,
+that must both be enabled for calibration to succeed. Without them:
+
+  qcom-dwmac-sgmii-phy 8909000.phy: QSERDES_COM_C_READY_STATUS timed-out
+  qcom-ethqos 23040000.ethernet eth0: __stmmac_open: Serdes powerup failed
+
+Use devm_regulator_bulk_get_const() to acquire both supplies and set
+the peak current loads (46 mA for vdda-0p9, 15 mA for vdda-1p2) as
+required by the hardware.
+
+On the Arduino VENTUNO Q the 0.9 V rail (vreg_l4a) has no Linux vote
+from the SerDes. The first SerDes initialization at boot works because
+the boot firmware left the rail on; once Linux releases it, every later
+initialization (ip link down/up, the TX watchdog reset after a link
+change) times out on C_READY_STATUS until a reboot.
+
+Adapted to 6.18: this kernel already enables a single "vdda-0p9"
+supply, without a load, in .power_on(); the bulk supplies replace it.
+.power_on() does not calibrate here (phy_set_speed() does), so the
+error path is the existing one.
+
+Fixes: 601d06277007 ("phy: qcom: add the SGMII SerDes PHY driver")
+Signed-off-by: Mohd Ayaan Anwar <mohd.anwar@oss.qualcomm.com>
+Reviewed-by: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
+Link: https://patch.msgid.link/20260804-b4-sgmiieth_serdes_regulator-v2-2-c4bc688177dd@oss.qualcomm.com
+Signed-off-by: Vinod Koul <vkoul@kernel.org>
+(cherry picked from commit 4f81684a1d1018d7d0e5579f08d95e7701279358)
+Upstream-Status: Backport [4f81684a1d10, adapted to 6.18]
+Signed-off-by: Leonardo Bornia <leonardo.bornia@toradex.com>
+---
+ drivers/phy/qualcomm/phy-qcom-sgmii-eth.c | 24 ++++++++++++++++-------
+ 1 file changed, 17 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/phy/qualcomm/phy-qcom-sgmii-eth.c b/drivers/phy/qualcomm/phy-qcom-sgmii-eth.c
+index 5044f2447..b64b8c3a1 100644
+--- a/drivers/phy/qualcomm/phy-qcom-sgmii-eth.c
++++ b/drivers/phy/qualcomm/phy-qcom-sgmii-eth.c
+@@ -26,8 +26,15 @@
+ #define QSERDES_PCS_SGMIIPHY_READY			BIT(7)
+ #define QSERDES_COM_C_PLL_LOCKED			BIT(1)
+ 
++static const struct regulator_bulk_data qcom_dwmac_sgmii_phy_vregs[] = {
++	{ .supply = "vdda-0p9", .init_load_uA = 46000 },
++	{ .supply = "vdda-1p2", .init_load_uA = 15000 },
++};
++
++#define QCOM_SGMII_NUM_SUPPLIES		ARRAY_SIZE(qcom_dwmac_sgmii_phy_vregs)
++
+ struct qcom_dwmac_sgmii_phy_data {
+-	struct regulator *vdda_0p9;
++	struct regulator_bulk_data *vregs;
+ 	struct regmap *regmap;
+ 	struct clk *refclk;
+ 	int speed;
+@@ -271,7 +278,7 @@ static int qcom_dwmac_sgmii_phy_power_on(struct phy *phy)
+ 	int ret;
+ 	struct qcom_dwmac_sgmii_phy_data *data = phy_get_drvdata(phy);
+ 
+-	ret = regulator_enable(data->vdda_0p9);
++	ret = regulator_bulk_enable(QCOM_SGMII_NUM_SUPPLIES, data->vregs);
+ 	if (ret)
+ 		goto out_ret;
+ 
+@@ -282,7 +289,7 @@ static int qcom_dwmac_sgmii_phy_power_on(struct phy *phy)
+ 	return 0;
+ 
+ out_reg_disable:
+-	regulator_disable(data->vdda_0p9);
++	regulator_bulk_disable(QCOM_SGMII_NUM_SUPPLIES, data->vregs);
+ out_ret:
+ 	return ret;
+ }
+@@ -299,7 +306,7 @@ static int qcom_dwmac_sgmii_phy_power_off(struct phy *phy)
+ 
+ 	clk_disable_unprepare(data->refclk);
+ 
+-	regulator_disable(data->vdda_0p9);
++	regulator_bulk_disable(QCOM_SGMII_NUM_SUPPLIES, data->vregs);
+ 
+ 	return 0;
+ }
+@@ -337,6 +344,7 @@ static int qcom_dwmac_sgmii_phy_probe(struct platform_device *pdev)
+ 	struct phy_provider *provider;
+ 	void __iomem *base;
+ 	struct phy *phy;
++	int ret;
+ 
+ 	data = devm_kzalloc(dev, sizeof(*data), GFP_KERNEL);
+ 	if (!data)
+@@ -361,9 +369,11 @@ static int qcom_dwmac_sgmii_phy_probe(struct platform_device *pdev)
+ 	if (IS_ERR(data->refclk))
+ 		return PTR_ERR(data->refclk);
+ 
+-	data->vdda_0p9 = devm_regulator_get(dev, "vdda-0p9");
+-	if (IS_ERR(data->vdda_0p9))
+-		return PTR_ERR(data->vdda_0p9);
++	ret = devm_regulator_bulk_get_const(dev, QCOM_SGMII_NUM_SUPPLIES,
++					    qcom_dwmac_sgmii_phy_vregs,
++					    &data->vregs);
++	if (ret)
++		return ret;
+ 
+ 	provider = devm_of_phy_provider_register(dev, of_phy_simple_xlate);
+ 	if (IS_ERR(provider))

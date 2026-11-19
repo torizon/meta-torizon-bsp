@@ -25,5 +25,8 @@ SRC_URI:append:ventuno-q = " file://0001-arm64-dts-qcom-monaco-arduino-monza-pow
     file://0002-arm64-dts-qcom-monaco-arduino-monza-enable-the-USB-link-to-the-MCU.patch \
     file://0003-misc-fastrpc-drop-leftover-invoke-contexts-on-release.patch \
     file://0004-net-stmmac-qcom-ethqos-configure-the-SerDes-for-the-interface-mode.patch \
+    file://0005-phy-qcom-sgmii-eth-vote-for-both-voltage-rails-with-correct-current-loads.patch \
+    file://0006-arm64-dts-qcom-monaco-monza-som-supply-both-SerDes-rails.patch \
+    file://0007-net-stmmac-qcom-ethqos-undo-the-SerDes-power-up-on-failure.patch \
     file://ventuno-q-edid.cfg \
 "
