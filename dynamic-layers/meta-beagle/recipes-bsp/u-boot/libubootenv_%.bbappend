@@ -6,5 +6,5 @@ PACKAGE_ARCH:beagley-ai = "${MACHINE_ARCH}"
 
 do_install:append:beagley-ai() {
     install -d ${D}/${sysconfdir}
-    install -m 0644 ${WORKDIR}/fw_env.config ${D}/${sysconfdir}/
+    install -m 0644 ${UNPACKDIR}/fw_env.config ${D}/${sysconfdir}/
 }

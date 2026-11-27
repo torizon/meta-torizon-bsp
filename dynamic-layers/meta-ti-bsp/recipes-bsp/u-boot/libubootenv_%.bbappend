@@ -6,5 +6,5 @@ PACKAGE_ARCH:common-ti = "${MACHINE_ARCH}"
 
 do_install:append:common-ti() {
     install -d ${D}/${sysconfdir}
-    install -m 0644 ${WORKDIR}/fw_env.config ${D}/${sysconfdir}/
+    install -m 0644 ${UNPACKDIR}/fw_env.config ${D}/${sysconfdir}/
 }
