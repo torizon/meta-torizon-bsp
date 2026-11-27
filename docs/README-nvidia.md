@@ -112,10 +112,16 @@ $ tar --zstd -xf <builddir>/deploy/images/<machine>/torizon-docker-<machine>.teg
 
     See NVIDIA's [Jetson AGX Thor flashing guide](https://docs.nvidia.com/jetson/archives/r38.2/DeveloperGuide/IN/QuickStart.html#to-flash-the-jetson-developer-kit-operating-software) for the authoritative procedure and board details.
 
-Confirm the host detects the board in recovery mode:
+Confirm the host detects the board in recovery mode. In recovery, the board
+enumerates with a recovery product ID that depends on the module, such as
+`0955:7026` on the Jetson AGX Thor DevKit or `0955:7523` on the Jetson Orin
+Nano DevKit. On a Jetson AGX Thor DevKit:
 ```
 $ lsusb -d 0955:
+Bus 003 Device 017: ID 0955:7026 NVIDIA Corp. APX
 ```
+> [!NOTE]
+> When the debug USB-C port of a Jetson AGX Thor DevKit is also connected to the host, `lsusb` lists its debug MCU too, as `0955:7045 NVIDIA Corp. Tegra On-Platform Operator`. It shows up whether or not the board is in recovery mode.
 
 5. Run the flashing script from the unpacked directory:
 ```
