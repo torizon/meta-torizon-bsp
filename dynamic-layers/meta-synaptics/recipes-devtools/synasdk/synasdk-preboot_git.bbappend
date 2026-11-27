@@ -10,5 +10,5 @@ SRC_URI:append:luna-sl1680 = " \
 "
 
 do_compile:prepend:luna-sl1680() {
-    cp -r ${WORKDIR}/ch0 ${S}/boot/preboot/prebuilts/bcm_ree/dolphin/A0/generic/hwinit/lpddr4x/4GB/3733/
+    cp -r ${UNPACKDIR}/ch0 ${S}/boot/preboot/prebuilts/bcm_ree/dolphin/A0/generic/hwinit/lpddr4x/4GB/3733/
 }
