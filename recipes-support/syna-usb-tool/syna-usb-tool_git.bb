@@ -13,8 +13,6 @@ SRC_URI:append:luna-sl1680 = " \
     "
 SRC_URI[luna-tarball.sha256sum] = "c1879d14f9ede4eceb387acb538e031103ecf2cbf41d8a00b87356f6674e65b0"
 
-S = "${WORKDIR}/git"
-
 inherit deploy
 
 do_configure[noexec] = "1"
@@ -30,7 +28,7 @@ do_deploy() {
 
 # Replace with Luna-specific files from tarball
 do_deploy:append:luna-sl1680() {
-    cp -r ${WORKDIR}/astra-usbboot-images/ ${SYNAIMG_DEPLOY}
+    cp -r ${UNPACKDIR}/astra-usbboot-images/ ${SYNAIMG_DEPLOY}
 }
 
 addtask deploy after do_compile
