@@ -216,7 +216,7 @@ create_setenv_script_from_embedded() {
         DD if="$SECONDARY_FIRMWARE_PATH" \
            iflag="skip_bytes,count_bytes" \
            skip="${env_offset}" count="${env_size}" 2>/dev/null \
-           | SED 's/\x00/\x0A/g' > "${out_script}.new"
+           | TR '\000' '\n' > "${out_script}.new"
         if [ $? -ne 0 ]; then
             log "Could not extract environment from binary!"
         else

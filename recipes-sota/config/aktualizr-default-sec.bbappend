@@ -36,7 +36,7 @@ def torizon_secondary_rdepends(d):
     if real_bootloader:
         dependencies.extend(['jq', 'util-linux', 'mmc-utils'])
     if real_bootloader or real_fuses:
-        dependencies.extend(['bash', d.getVar('VIRTUAL-RUNTIME_base-utils') or '', 'sed',
+        dependencies.extend(['bash', d.getVar('VIRTUAL-RUNTIME_base-utils') or '',
                              'u-boot-fw-utils'])
 
     return ' '.join(dep for dep in dependencies if dep)
