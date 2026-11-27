@@ -6,7 +6,7 @@ PACKAGE_ARCH:imx93-11x11-lpddr4x-frdm = "${MACHINE_ARCH}"
 
 do_install:append:imx93-11x11-lpddr4x-frdm() {
     install -d ${D}/${sysconfdir}
-    install -m 0644 ${WORKDIR}/fw_env.config ${D}/${sysconfdir}/
+    install -m 0644 ${UNPACKDIR}/fw_env.config ${D}/${sysconfdir}/
 }
 
 # Raw MMC region compiled into U-Boot: greenboot's bootcount reset needs it.
@@ -17,7 +17,7 @@ PACKAGE_ARCH:common-imx6 = "${MACHINE_ARCH}"
 
 do_install:append:common-imx6 () {
     install -d ${D}${sysconfdir}
-    install -m 0644 ${WORKDIR}/fw_env.config ${D}${sysconfdir}/fw_env.config
+    install -m 0644 ${UNPACKDIR}/fw_env.config ${D}${sysconfdir}/fw_env.config
 }
 
 FILES:${PN}-bin:append:common-imx6 = " ${sysconfdir}/fw_env.config"

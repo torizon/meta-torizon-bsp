@@ -23,10 +23,10 @@ SRC_URI:append:mx6sx-generic-bsp = " file://no-ldo-bypass.cfg"
 SRC_URI:append:common-imx6 = " file://torizon-imx6sx.env file://torizon-imx6sx-env.cfg"
 
 # A second i.MX 6 machine whose U-Boot builds elsewhere overrides this.
-UBOOT_ENV_BOARD_DIR ?= "board/freescale/mx6sxsabresd"
+UBOOT_ENV_BOARD_DIR ?= "board/nxp/mx6sxsabresd"
 
 do_configure:prepend:common-imx6() {
-    install -m 0644 ${WORKDIR}/torizon-imx6sx.env ${S}/${UBOOT_ENV_BOARD_DIR}/torizon-imx6sx.env
+    install -m 0644 ${UNPACKDIR}/torizon-imx6sx.env ${S}/${UBOOT_ENV_BOARD_DIR}/torizon-imx6sx.env
 }
 
 SRC_URI:append:imx6sxsabresd = " file://torizon-boot.cfg file://fastboot.cfg"
