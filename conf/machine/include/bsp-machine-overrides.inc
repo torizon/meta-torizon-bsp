@@ -2,16 +2,20 @@
 # families.
 #
 # Default to "nxp": Toradex machines get their own IMX_DEFAULT_BSP from
-# TDX_BSP_VARIANT (tdx-nxp-*.inc / tdx-upstream-mainline*.inc), and
+# TDX_BSP_VARIANT (tdx-nxp-*.inc / tdx-upstream-*.inc), and
 # Common Torizon NXP machines have no such chain, so both need "nxp".
 #
 # TDX_BSP_VARIANT is checked directly rather than via a :upstream
 # override (collides with torizon-upstream[-rt].conf's DISTROOVERRIDES
 # flag) or MACHINEOVERRIDES (circular: it's partly derived from
 # IMX_DEFAULT_BSP itself). The mainline values are an explicit list, not
-# a prefix match, so adding a new variant is a deliberate edit here.
-TDX_BSP_VARIANT_MAINLINE_VALUES = "tdx-upstream-mainline tdx-upstream-mainline-rt"
-IMX_DEFAULT_BSP = "${@'mainline' if d.getVar('TDX_BSP_VARIANT') in d.getVar('TDX_BSP_VARIANT_MAINLINE_VALUES').split() else 'nxp'}"
+# a prefix match, so adding a new variant is a deliberate edit here. A
+# tdx-upstream-* variant missing from the list stops the parse instead of
+# silently falling back to "nxp".
+TDX_BSP_VARIANT_MAINLINE_VALUES = "tdx-upstream-6_18 tdx-upstream-6_18-rt"
+IMX_DEFAULT_BSP = "${@'mainline' if d.getVar('TDX_BSP_VARIANT') in d.getVar('TDX_BSP_VARIANT_MAINLINE_VALUES').split() \
+    else bb.fatal('TDX_BSP_VARIANT %s is not in TDX_BSP_VARIANT_MAINLINE_VALUES, add it in bsp-machine-overrides.inc' % d.getVar('TDX_BSP_VARIANT')) \
+    if (d.getVar('TDX_BSP_VARIANT') or '').startswith('tdx-upstream') else 'nxp'}"
 
 IMAGE_BOOT_FILES_REMOVE:append:apalis-imx8 = " hdmitxfw.bin dpfw.bin"
 IMAGE_CLASSES:append = " torizon-image-machine"

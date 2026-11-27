@@ -25,6 +25,10 @@ DTB_PREFIX ??= "${@d.getVar('KERNEL_DTB_PREFIX').replace("/", "_") if d.getVar('
 # representing device-tree overlays) to be used when booting.
 FITCONF_FDT_OVERLAYS ??= ""
 
+# The same, for the FIT image of a deployment that names its overlay
+# configurations without DTB_PREFIX (see load_overlay in uEnv.txt.in)
+FITCONF_FDT_OVERLAYS_NOPREFIX = "${@d.getVar('FITCONF_FDT_OVERLAYS').replace('#conf-' + d.getVar('DTB_PREFIX'), '#conf-') if d.getVar('DTB_PREFIX') else d.getVar('FITCONF_FDT_OVERLAYS')}"
+
 # FDT_OVERLAYS_RESIZE: extra space added to the device tree (fdt resize) before
 # applying device-tree overlays, when not booting a FIT image. It must fit all
 # overlays applied at boot, otherwise fdt apply fails and leaves the device
@@ -130,6 +134,7 @@ do_compile() {
         -e 's/@@KERNEL_IMAGETYPE@@/${KERNEL_IMAGETYPE}/' \
         -e 's/@@KERNEL_DTB_PREFIX@@/${DTB_PREFIX}/' \
         -e 's/@@FITCONF_FDT_OVERLAYS@@/${FITCONF_FDT_OVERLAYS}/' \
+        -e 's/@@FITCONF_FDT_OVERLAYS_NOPREFIX@@/${FITCONF_FDT_OVERLAYS_NOPREFIX}/' \
         -e 's/@@BOOTARG_ROOT@@/${BOOTARG_ROOT}/' \
         -e 's/@@FDT_OVERLAYS_RESIZE@@/${FDT_OVERLAYS_RESIZE}/' \
         ${S}/uEnv.txt.in > ${S}/uEnv.txt.temp
