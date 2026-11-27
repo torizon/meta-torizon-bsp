@@ -12,7 +12,7 @@ PV = "1.0"
 
 SRC_URI = "file://imx6sxsabresd.uuu"
 
-S = "${WORKDIR}"
+S = "${UNPACKDIR}"
 
 inherit deploy
 
